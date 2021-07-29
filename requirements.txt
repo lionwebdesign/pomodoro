@@ -1,0 +1,3 @@
+DocifyPLUS==1.0.0
+lambdaChaining==1.0.0
+pygame==2.0.1
