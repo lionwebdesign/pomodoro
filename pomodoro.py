@@ -1,68 +1,69 @@
 import time 
 import datetime as dt
-
 import tkinter as tk
 from tkinter import messagebox
 import os
-
 from pygame import mixer
 mixer.init() 
 
-#Main variables
-currentTime = dt.datetime.now()
-pomodoroTime = 25
-timer = pomodoroTime*60
-timeDelta = dt.timedelta(0, timer)
-futureTime = currentTime + timeDelta
-breakTime = 5*60
-finalTime = currentTime + dt.timedelta(0, timer + breakTime)
+class POMODORO:
+    def __init__(self):
+        #Main variables
+        self.currentTime = dt.datetime.now()
+        self.pomodoroTime = 25
+        self.timer = self.pomodoroTime*60
+        self.timeDelta = dt.timedelta(0, self.timer)
+        self.futureTime = self.currentTime + self.timeDelta
+        self.breakTime = 5*60
+        self.finalTime = self.currentTime + dt.timedelta(0, self.timer + self.breakTime)
+        self.totalPomodoros = 0
+        self.totalBreaks = 0
 
-# GUI
-root = tk.Tk()
-root.withdraw()
+    def SoundAlert(self):
+        self.alert = mixer.Sound('assets/bell.wav')
+        self.alert.play()
 
-messagebox.showinfo("Pomodoro Started!", "\nIts now " + currentTime.strftime('%H:%M:%S') + " hrs. \nTimer set for " + str(pomodoroTime) + " mins.")
+    def PomodoroStart(self):
+        messagebox.showinfo("Pomodoro Started!", "\nIts now " + self.currentTime.strftime('%H:%M:%S') + " hrs. \nTimer set for " + str(self.pomodoroTime) + " mins.")
+        self.currentTime = dt.datetime.now()
+        self.futureTime = self.currentTime + dt.timedelta(0, self.timer)
+        self.finalTime = self.currentTime + dt.timedelta(0, self.timer + self.breakTime)
+    
+    def pomodoroWorking(self):
+        messagebox.showinfo("Pomodoro Started!", "\nIts now " + self.currentTime.strftime('%H:%M:%S') + " hrs. \nTimer set for " + str(self.pomodoroTime) + " mins.")
 
-totalPomodoros = 0
-totalBreaks = 0
+        while True:
+            if (self.currentTime < self.futureTime):
+                print('Pomodoro')
+            elif (self.futureTime <= self.currentTime <= self.finalTime):
+                print('In break')
+                if (self.totalBreaks == 0):
+                    print('In break')
+                    for i in range(5):
+                        self.SoundAlert()
+                    print('Break time!')
+                    self.totalBreaks += 1
+            else:
+                print('Finished')
+                self.totalBreaks = 0
+                for i in range(10):
+                    self.SoundAlert()
+                userAnswer = messagebox.askyesno("Pomodoro Finished!", "\n Would you like to statrt another pomodoro?")
+                self.totalPomodoros += 1
+                if (userAnswer == True):
+                    self.PomodoroStart()
+                    continue
+                else:
+                    messagebox.showinfo("Pomodoro Finished!", "\nYou completed " + str(self.totalPomodoros) + " pomodoros today!")
+                    break
+            print("Sleeping")
+            time.sleep(20)
+            self.currentTime = dt.datetime.now()
+            timeNow = self.currentTime.strftime("%H:%M:%S")
 
-def SoundAlert():
-    alert = mixer.Sound('assets/bell.wav')
-    alert.play()
+    # GUI
+    root = tk.Tk()
+    root.withdraw()
 
-def PomodoroStart():
-    global currentTime
-    messagebox.showinfo("Pomodoro Started!", "\nIts now " + currentTime.strftime('%H:%M:%S') + " hrs. \nTimer set for " + str(pomodoroTime) + " mins.")
-    currentTime = dt.datetime.now()
-    futureTime = currentTime + dt.timedelta(0, timer)
-    finalTime = currentTime + dt.timedelta(0, timer + breakTime)
-
-
-while True:
-    if (currentTime < futureTime):
-        print('Pomodoro')
-    elif (futureTime <= currentTime <= finalTime):
-        print('In break')
-        if (totalBreaks == 0):
-            print('In break')
-            for i in range(5):
-                SoundAlert()
-            print('Break time!')
-            totalBreaks += 1
-    else:
-        print('Finished')
-        totalBreaks = 0
-        for i in range(10):
-            SoundAlert()
-        userAnswer = messagebox.askyesno("Pomodoro Finished!", "\n Would you like to statrt another pomodoro?")
-        totalPomodoros += 1
-        if (userAnswer == True):
-            PomodoroStart()
-            continue
-        elif (userAnswer == False):
-            messagebox.showinfo("Pomodoro Finished!", "\nYou completed " + str(totalPomodoros) + " pomodoros today!")
-            break
-    print("Sleeping")
-    time.sleep(20)
-    currentTime = dt.datetime.now()
-    timeNow = currentTime.strftime("%H:%M:%S")
+p = POMODORO()
+p.pomodoroWorking()
